@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 __author__ = 'byron'
-import hashlib
 import datetime
 import traceback
 import os

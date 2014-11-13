@@ -6,7 +6,7 @@ import re
 class Common:
 
     @staticmethod
-    def getMd5Value(self, src):
+    def getMd5Value(src):
         src = str(src)
         myMd5 = hashlib.md5()
         myMd5.update(src)
@@ -14,12 +14,11 @@ class Common:
         return myMd5_Digest
 
     @staticmethod
-    def isValidUrl(self, url):
+    def isValidUrl(url):
         pat = re.compile(r'^https?:/{2}\w.*?[;#?]')
         match = pat.search(str(url))
-        print "url = " + str(url)
         if match:
             href = match.group(1)
             return href
         else:
-            return ""
+            return url

@@ -5,32 +5,42 @@ import hashlib
 import datetime
 import traceback
 import socket
+import os
 import re
+import time
 from pymongo import Connection
 from bs4 import BeautifulSoup
 import urllib2
 from urllib2 import Request, urlopen, URLError, HTTPError
-import time
 from common import Common
 
 class SpiderCore:
-    def __init__(self, url,maxcount):
+    def __init__(self, url, maxcount):
         self._url = url
-        self.connectMongoDb()
         self._db = ""
+        self.connectMongoDb()
         self._i = 0
         self._maxcount = maxcount
+        print self._db
 
     def connectMongoDb(self):
-        conn = Connection("*.*.*.*", 27017)
+        conn = Connection("*", 27017)
         self._db = conn.spider
-        self._db.authenticate("***", "***")
+        result = self._db.authenticate("*", "*")
+        return result
 
-    def setPlanLinksIndex(self, url):
+    def setPlanLinksIndexEd(self, url):
         md5_url = Common.getMd5Value(url)
         self._db.plan_links.update(
             {"md5_url": md5_url},
             {"$set": {"is_index": 1}}
+        )
+
+    def setPlanLinksIndexEx(self, url):
+        md5_url = Common.getMd5Value(url)
+        self._db.plan_links.update(
+            {"md5_url": md5_url},
+            {"$set": {"is_index": 2}}
         )
 
     def getPageContent(self, url):
@@ -49,14 +59,24 @@ class SpiderCore:
             return result
 
     def saveToContent(self, url, content):
-        datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        str_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         content_de = content.decode("unicode_escape", 'ignore')
         md5_content = Common.getMd5Value(content)
         self._db.links.save({
             'url':url,
             'content': content_de,
             'md5_content': md5_content,
-            'datetime': datetime
+            'datetime': str_datetime
+        })
+
+    def saveToPlanLinks(self, url):
+        str_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        md5_url = Common.getMd5Value(url)
+        self._db.plan_links.save({
+            'url':url,
+            'md5_url':md5_url,
+            'is_index':0,
+            'get_datetime':str_datetime
         })
 
     def getPageLinks(self, url, content):
@@ -75,33 +95,33 @@ class SpiderCore:
                     else:
                         ans = url+href
                     print ans
-                    saveToPlanLinks(ans) #insert into plan links list
+                    self.saveToPlanLinks(ans) #insert into plan links list
 
-    def spider(self,i):
+    def spider(self, i):
         try:
-            datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            str_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             item = self._db.plan_links.find_one({'is_index': 0}, {'url': 1})
-            #url = isValidUrl(item[u'url'].encode('utf-8'))
+            #url = Common.isValidUrl(item[u'url'].encode('utf-8'))
             url = item[u'url'].encode('utf-8')
-            self.setPlanLinksIndex(url)
+            self.setPlanLinksIndexEd(url)
+            print "spider url:", url
             if url != "":
                 content = self.getPageContent(url)
-                self._saveToContent(url, content)
-                md5_url = hashlib.new("md5", url).hexdigest()
-                self._db.plan_links.update({'md5_url': md5_url} ,{"$set": {"is_index": 1}})
+                self.saveToContent(url, content)
                 self.getPageLinks(url, content)
-                print url, datetime, "\n"
+                print url, str_datetime
                 return True
         except Exception, ex:
-            print "[error = 001,num = "+str(i)+"]"
+            print "[error = 001,num = "+str(i)+"]", ex
 
     def start(self):
+        self.saveToPlanLinks(self._url)
         for i in range(0, self._maxcount):
             try:
                 self.spider(i)
             except Exception, ex:
                     print "[error = 002,num = "+str(i)+"]"
             finally:
-                datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                print "spider finish", "[" +str(i) + "]", datetime
+                str_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+                print "spider finish", "[" +str(i) + "]", str_datetime
 
