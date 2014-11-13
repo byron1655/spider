@@ -7,6 +7,7 @@ import traceback
 import socket
 import re
 from pymongo import Connection
+from bs4 import BeautifulSoup
 import urllib2
 from urllib2 import Request, urlopen, URLError, HTTPError
 import time
