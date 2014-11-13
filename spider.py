@@ -106,7 +106,7 @@ def getPageLinks(url,content):
 
 
 def isValidUrl(url):
-    pat = re.compile(r'^https?:/{2}\w.*?[;#]')
+    pat = re.compile(r'^https?:/{2}\w.*?[;#?]')
     match = pat.search(str(url))
     print "url = " + str(url)
     if match:
