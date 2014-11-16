@@ -7,9 +7,10 @@ import re
 import time
 from spiderCore import SpiderCore
 
-maxcount = 100000
-url = "http://news.163.com"
-SpiderCore = SpiderCore(url, maxcount)
+maxcount = 2000
+maxlevel = 5
+url = "http://www.lagou.com/"
+SpiderCore = SpiderCore(url, maxcount,maxlevel)
 SpiderCore.start()
 
 def getAutomaticId(name):
