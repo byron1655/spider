@@ -38,4 +38,6 @@ class Common:
 
     @staticmethod
     def isValidUrl(site_url, ex_url):
+        if ex_url is None or ex_url =="":
+            return False
         return Common.isExternalUrl(site_url, ex_url)
