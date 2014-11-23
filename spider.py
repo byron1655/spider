@@ -5,7 +5,7 @@ import traceback
 import os
 import re
 import time
-from spiderCore import SpiderCore
+from spider_core import SpiderCore
 
 url = "http://www.lagou.com/"
 maxcount = 2000

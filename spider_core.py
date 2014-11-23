@@ -12,7 +12,7 @@ import time
 from bs4 import BeautifulSoup
 import urllib2
 from urllib2 import Request, urlopen, URLError, HTTPError
-from MongoDBHelper import MongoDBHelper
+from mongodb_helper import MongoDBHelper
 from common import Common
 
 class SpiderCore:
